@@ -4,6 +4,10 @@ from typing import Text
 
 
 class XpDataApi:
+    @property
+    def records_per_page(self):
+        return 10
+
     def __init__(self, client_id: Text, client_secret: Text):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -66,6 +70,17 @@ class XpDataApi:
     def get_openbanking_user_data(self, user_name: Text):
         return self._get_request_data(f"openbanking/users/{user_name}")
 
+    def get_openbanking_users_data(self):
+        data_users = []
+        data_page = [1]
+        page_num = 0
+        while data_page: #Cuidado para loop infinito
+            params = f"limit={self.records_per_page}&offset={self.records_per_page*page_num}"
+            data_page = self._get_request_data(f"openbanking/users?{params}")
+            data_users.extend(data_page)
+            page_num += 1
+        return data_users
+
     def get_banking_user_account_balance(self, user_name: Text):
         return self._get_request_data(f"banking/users/{user_name}/checking-account/balance")
 
@@ -83,9 +98,9 @@ if __name__ == '__main__':
     client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
     api = XpDataApi(client_id=client_id, client_secret=client_secret)
 
-    data = api.get_banking_user_investments("JOAO")
+    data = api.get_openbanking_users_data()
 
-    print(data)
+    print(len(data))
 
 
 
