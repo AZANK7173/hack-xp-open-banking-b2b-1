@@ -1,9 +1,9 @@
 from matplotlib.pyplot import title
 import streamlit as st 
-from news import get_news
-from create_tables import st_table,st_table_cc, lista
+from src.news import get_news
+from src.create_tables import st_table,st_table_cc, lista
 
-def show_assessor_all():
+def show_assessor_all(users_list):
     st.title('Central do Assessor')
     st.subheader('Últimas Movimentações de Investimento de seus Clientes')
     hide_dataframe_row_index = """
@@ -15,7 +15,7 @@ def show_assessor_all():
     st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
     st.dataframe(st_table)
 
-    st.subheader('Dados Open Finance: Últimos Lancamentos Conta Corrente')
+    st.subheader('Dados Open Finance: Últimos Lancamentos Conta Corrente - Clientes')
     st.dataframe(st_table_cc)
 
     st.subheader('Dados Open Finance: Balanço dos Clientes (oportunidades de novas vendas)')
@@ -24,6 +24,16 @@ def show_assessor_all():
     col2.metric(f"{lista[1][0]}", f"R$ {int(lista[1][1])}", "- R$ 12780")
     col3.metric(f"{lista[2][0]}", f"R$ {int(lista[2][1])}", "- R$ 200")
     col4.metric(f"{lista[3][0]}", f"R$ {int(lista[3][1])}", "R$ 4500")
+
+    st.subheader('Acessar dados de cliente')
+    option = st.selectbox(
+        f'Escolha um produto',
+        users_list
+    )
+    _, _, _, col4_1 = st.columns(4)
+    link = f'[[Acessar Cliente]](http://192.168.0.2:8501/?user_name={option})'
+    col4_1.markdown(link, unsafe_allow_html=True)
+
 
 def show_news():
     st.sidebar.subheader('Últimas Notícias')

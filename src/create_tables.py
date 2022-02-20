@@ -6,7 +6,7 @@ warnings.filterwarnings("ignore")
 def time_process(date):
     return date.strftime("%D")
 
-data = pd.read_csv('all_users_and_products.csv')
+data = pd.read_csv('src/data/all_users_and_products.csv')
 clients = ['JOSE', 'JOAO', 'FRANCISCO', 'CARLOS','SARA','MARTA', 'JULIANA', 'MARCIA']
 client_data = data[data['client_name'].isin(clients)]
 client_data['acquisitionDate'] = pd.to_datetime(client_data['acquisitionDate']).copy()
@@ -21,7 +21,7 @@ st_table.columns = ['Data da Aquisição','Volume Compra','Cliente','Investiment
 
 
 #Tabela Conta Corrente
-from api_communication import XpDataApi
+from src.api_communication import XpDataApi
 import os
 import pandas as pd
 
