@@ -1,5 +1,4 @@
-from matplotlib.pyplot import title
-import streamlit as st 
+import streamlit as st
 from src.news import get_news
 from src.create_tables import st_table,st_table_cc, lista
 
