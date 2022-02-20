@@ -25,10 +25,8 @@ from src.api_communication import XpDataApi
 import os
 import pandas as pd
 
-#client_id = os.environ.get('HACK_XP_CLIENT_ID')
-client_id = 'XUShAWJwg3hGSuu86xvT0fFv0DAWdRkAWXvsvE5YLN9v1aG2'
-#client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
-client_secret = 'oOHtUfak8mQPpyA07taGGvNbRwujxlqLlFBamb0bvOwSSLDn1yrGlI7T3rzJXskB'
+client_id = os.environ.get('HACK_XP_CLIENT_ID')
+client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
 clients = ['JOSE', 'JOAO', 'FRANCISCO', 'CARLOS','SARA','MARTA', 'JULIANA', 'MARCIA']
 api = XpDataApi(client_id=client_id, client_secret=client_secret)
 
