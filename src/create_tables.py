@@ -1,4 +1,5 @@
 import pandas as pd
+import streamlit as st
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -25,8 +26,8 @@ from src.api_communication import XpDataApi
 import os
 import pandas as pd
 
-client_id = os.environ.get('HACK_XP_CLIENT_ID')
-client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
+client_id = st.secrets["HACK_XP_CLIENT_ID"]
+client_secret = st.secrets["HACK_XP_CLIENT_SECRET"]
 clients = ['JOSE', 'JOAO', 'FRANCISCO', 'CARLOS','SARA','MARTA', 'JULIANA', 'MARCIA']
 api = XpDataApi(client_id=client_id, client_secret=client_secret)
 

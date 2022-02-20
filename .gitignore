@@ -111,6 +111,8 @@ env.bak/
 venv.bak/
 .idea/
 .idea
+.streamlit/
+.streamlit
 
 # Spyder project settings
 .spyderproject

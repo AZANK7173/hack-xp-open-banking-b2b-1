@@ -15,8 +15,8 @@ st.set_page_config(
     layout="wide",
 )
 
-client_id = os.environ.get('HACK_XP_CLIENT_ID')
-client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
+client_id = st.secrets["HACK_XP_CLIENT_ID"]
+client_secret = st.secrets["HACK_XP_CLIENT_SECRET"]
 
 api = XpDataApi(client_id=client_id, client_secret=client_secret)
 

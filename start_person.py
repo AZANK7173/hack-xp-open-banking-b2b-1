@@ -18,8 +18,8 @@ app_state = st.experimental_get_query_params()
 app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
 user_name = app_state.get("user_name", "NAYLLA")
 
-client_id = os.environ.get('HACK_XP_CLIENT_ID')
-client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
+client_id = st.secrets["HACK_XP_CLIENT_ID"]
+client_secret = st.secrets["HACK_XP_CLIENT_SECRET"]
 
 api = XpDataApi(client_id=client_id, client_secret=client_secret)
 app = AppClientData(api, user_name)
