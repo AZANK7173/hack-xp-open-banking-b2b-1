@@ -36,6 +36,10 @@ def show_assessor_all(users_list):
 
 
 def show_news():
+    from PIL import Image
+    image = Image.open('Logo_hack.jpg')
+    st.sidebar.image(image)
+
     st.sidebar.subheader('Últimas Notícias')
     link = 'https://www.infomoney.com.br/feed/'
     titles, links = get_news(link)

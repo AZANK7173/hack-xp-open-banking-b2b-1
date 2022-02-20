@@ -31,8 +31,11 @@ class AppClientData:
         df = pd.read_csv('src/data/dataset.csv', index_col=1)
         return df.loc[df['client_name'] == client_name, "client_id"].values[0]
 
-    def create_user_page(self): 
-        
+    def create_user_page(self):
+        from PIL import Image
+        image = Image.open('Logo_hack.jpg')
+        st.sidebar.image(image)
+
         st.title(f'Investimentos de {self.client_name}')
         sidebar = st.sidebar.title(f'Dados de {self.client_name}')
         user_data = self.api.get_openbanking_user_data(self.client_name)
