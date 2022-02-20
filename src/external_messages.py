@@ -1,5 +1,8 @@
 import streamlit as st
+import time
+import os
 
+from src.api_communication import XpDataApi
 from typing import List, Text, Dict, Any
 
 
@@ -42,6 +45,95 @@ class CreateMessages:
         return main_text
 
 
+class ComunicationUserSt:
+    def __init__(self, user_name: Text):
+        self.user_name = user_name
+        client_id = os.environ.get('HACK_XP_CLIENT_ID')
+        client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
+        self.api = XpDataApi(client_id=client_id, client_secret=client_secret)
+        self.data = self.api.get_broker_products()
+        self.user_data_inv = self.api.get_banking_user_investments(self.user_name)
+
+    def _email_fn(self, expander):
+        time.sleep(2)
+        expander.success(f'Enviado para {self.user_name} por e-mail')
+
+    def _whats_fn(self, expander):
+        time.sleep(2)
+        expander.success(f'Enviado para {self.user_name} por whatsapp')
+
+    def create_relatorios(self):
+        expander = st.expander("Enviar relatórios da carteira")
+        col1_d, col2_d = expander.columns(2)
+        date_s = col1_d.date_input("Data de inicio do relatório")
+        date_e = col2_d.date_input("Data de fim do relatório")
+
+        period = date_s.strftime("%d/%m/%Y") +" - "+ date_e.strftime("%d/%m/%Y")
+
+        id_period = id(period)
+        var = (id_period / 10 ** len(str(id_period)))*3
+
+        list_product = []
+        for inv_type, list_inv_product in self.user_data_inv.items():
+            list_product.extend(list_inv_product)
+        data_product = {}
+        for product in list_product:
+            if 'ticker' in product:
+                data_product[product['ticker']] = product.get('profitability', 0)
+            else:
+                data_product[product['identity']] = product.get('profitability', 0)
+
+        text = CreateMessages().get_relatorio_carteira_message(self.user_name, period, 0, round(var, 3), data_product)
+        txt = expander.text_area('Mensagem:', text)
+        col1, col2, col3 = expander.columns(3)
+        col2.button('1- Enviar por e-mail', on_click=lambda: self._email_fn(expander))
+        col3.button('1- Enviar por whatsapp', on_click=lambda: self._whats_fn(expander))
+
+    def create_modification(self):
+        expander = st.expander("Enviar recomendação de modificação da carteira")
+        text = CreateMessages().get_modification_in_portfolio_message(self.user_name, self.data)
+        txt = expander.text_area('Mensagem:', text)
+        col1, col2, col3 = expander.columns(3)
+        col2.button('2- Enviar por e-mail', on_click=lambda: self._email_fn(expander))
+        col3.button('2- Enviar por whatsapp', on_click=lambda: self._whats_fn(expander))
+
+    def create_new_product(self):
+        import random
+        expander = st.expander("Enviar recomendação de novo produto")
+        product_options = []
+        for k, v in self.data.items():
+            if k != "name":
+                product_options.extend([x for x in v])
+
+        id_name = id(self.user_name)
+        options_for_product = [x['identity'] for x in product_options]
+        random.shuffle(options_for_product, lambda: id_name/10**len(str(id_name)))
+        option = expander.selectbox(
+            f'Escolha um produto (os primeiros são os mais recomendados para o {self.user_name})',
+            options_for_product
+        )
+        expander.checkbox("Enviar prospecto em anexo")
+        expander.checkbox("Enviar relatório em anexo")
+        text = CreateMessages().get_new_product_message(self.user_name,
+                                                        next((x for x in product_options if x['identity'] == option),
+                                                             {}))
+        txt = expander.text_area('Mensagem:', text)
+        col1, col2, col3 = expander.columns(3)
+        col2.button('3- Enviar por e-mail', on_click=lambda: self._email_fn(expander))
+        col3.button('3- Enviar por whatsapp', on_click=lambda: self._whats_fn(expander))
+
+    def show(self):
+        container = st.container()
+        container.subheader(f'Enviar informações para {self.user_name}')
+
+        app_state = st.experimental_get_query_params()
+        app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
+        st.write(f"{app_state}")
+        self.create_relatorios()
+        self.create_modification()
+        self.create_new_product()
+
+
 def create_for_user(user_name: Text):
     import os
     from src.api_communication import XpDataApi
@@ -53,6 +145,10 @@ def create_for_user(user_name: Text):
 
     container = st.container()
     container.subheader(f'Enviar informações para {user_name}')
+
+    app_state = st.experimental_get_query_params()
+    app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
+    st.write(f"{app_state}")
 
     # Relatório
     with container.container():
