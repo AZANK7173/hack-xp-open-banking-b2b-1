@@ -34,7 +34,7 @@ class XpDataApi:
         if response_key.ok:
             self.api_access_code = response_key.json()['access_token']
         else:
-            raise Exception(f"Was not possible to get access_token {response_key.text}, {response_key.status_code}")
+            raise Exception(f"Was not possible to get access_token {response_key.text}, {response_key.status_code}, {self.client_id}")
 
     def _get_request_data(self, endpoint: Text):
         if self.api_access_code is None:
