@@ -1,4 +1,4 @@
-from api_communication import XpDataApi
+from src.api_communication import XpDataApi
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
@@ -14,11 +14,11 @@ class Report:
         if download_dataset:
             self.inv_user_df = self._create_user_investment_df()
         else:
-            df = pd.read_csv('data/dataset.csv', index_col = 1)
+            df = pd.read_csv('src/data/dataset.csv', index_col = 1)
             self.inv_user_df = df.loc[df.client_name == self.client_name]
 
     def _create_user_investment_df(self): 
-        user_investments  = self.api.get_banking_user_investments(self.client_name)
+        user_investments = self.api.get_banking_user_investments(self.client_name)
 
         inv_user_df = pd.DataFrame(columns=self.column_names)
         for p in self.product_names: 

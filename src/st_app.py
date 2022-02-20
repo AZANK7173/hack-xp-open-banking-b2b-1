@@ -1,17 +1,17 @@
-from recommendation import InvestmentRecommender
-from user_report import Report
-from api_communication import XpDataApi
+from src.recommendation import InvestmentRecommender
+from src.user_report import Report
+from src.api_communication import XpDataApi
 
 import streamlit as st
 import pandas as pd
 
 class AppClientData: 
 
-    def __init__(self, api, client_name, client_id):
+    def __init__(self, api, client_name):
 
         self.api = api
-        self.client_id = client_id
         self.client_name = client_name
+        self.client_id = self._get_app_cliente_id(self.client_name)
 
         self.report = Report(self.api, self.client_name)
 
@@ -26,6 +26,10 @@ class AppClientData:
 
         self.recommended_renda_fixa = pd.DataFrame(recommended_renda_fixa, columns = ['Produtos'])
         self.recommended_renda_variavel = pd.DataFrame(recommended_renda_variavel, columns = ['Produtos'])
+
+    def _get_app_cliente_id(self, client_name):
+        df = pd.read_csv('src/data/dataset.csv', index_col=1)
+        return df.loc[df['client_name'] == client_name, "client_id"].values[0]
 
     def create_user_page(self): 
         

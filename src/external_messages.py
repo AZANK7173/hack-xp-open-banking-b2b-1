@@ -1,5 +1,6 @@
 import streamlit as st
 import time
+import hashlib
 import os
 
 from src.api_communication import XpDataApi
@@ -46,11 +47,9 @@ class CreateMessages:
 
 
 class ComunicationUserSt:
-    def __init__(self, user_name: Text):
+    def __init__(self, user_name: Text, api: XpDataApi):
         self.user_name = user_name
-        client_id = os.environ.get('HACK_XP_CLIENT_ID')
-        client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
-        self.api = XpDataApi(client_id=client_id, client_secret=client_secret)
+        self.api = api
         self.data = self.api.get_broker_products()
         self.user_data_inv = self.api.get_banking_user_investments(self.user_name)
 
@@ -70,7 +69,7 @@ class ComunicationUserSt:
 
         period = date_s.strftime("%d/%m/%Y") +" - "+ date_e.strftime("%d/%m/%Y")
 
-        id_period = id(period)
+        id_period = int(hash(period))
         var = (id_period / 10 ** len(str(id_period)))*3
 
         list_product = []
@@ -105,7 +104,7 @@ class ComunicationUserSt:
             if k != "name":
                 product_options.extend([x for x in v])
 
-        id_name = id(self.user_name)
+        id_name = int(hash(self.user_name))
         options_for_product = [x['identity'] for x in product_options]
         random.shuffle(options_for_product, lambda: id_name/10**len(str(id_name)))
         option = expander.selectbox(
@@ -126,31 +125,22 @@ class ComunicationUserSt:
         container = st.container()
         container.subheader(f'Enviar informações para {self.user_name}')
 
-        app_state = st.experimental_get_query_params()
-        app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
-        st.write(f"{app_state}")
         self.create_relatorios()
         self.create_modification()
         self.create_new_product()
 
 
 class ComunicationForAllUsersSt:
-    def __init__(self):
+    def __init__(self, api: XpDataApi, users_to_send):
         self.user_name = "<Nome-Do-Usuario>"
-        client_id = os.environ.get('HACK_XP_CLIENT_ID')
-        client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
-        self.api = XpDataApi(client_id=client_id, client_secret=client_secret)
+        self.api = api
         self.data = self.api.get_broker_products()
-        self.users_to_send = self._get_users_name()
+        self.users_to_send = users_to_send
         self.user_data_inv = {"Stock": [
             {"identity": "EX 1", 'profitability': 1.2},
             {"identity": "EX 2", 'profitability': -1.3},
             {"identity": "EX 3", 'profitability': 15.2}
         ]}
-
-    @st.cache
-    def _get_users_name(self):
-        return [x["name"] for x in self.api.get_openbanking_users_data()]
 
     def _email_fn(self, expander, txt):
         time.sleep(2)
@@ -168,7 +158,7 @@ class ComunicationForAllUsersSt:
 
         period = date_s.strftime("%d/%m/%Y") +" - "+ date_e.strftime("%d/%m/%Y")
 
-        id_period = id(period)
+        id_period = int(hash(period))
         var = (id_period / 10 ** len(str(id_period)))*3
 
         list_product = []
@@ -203,7 +193,7 @@ class ComunicationForAllUsersSt:
             if k != "name":
                 product_options.extend([x for x in v])
 
-        id_name = id(self.user_name)
+        id_name = int(hash(self.user_name))
         options_for_product = [x['identity'] for x in product_options]
         random.shuffle(options_for_product, lambda: id_name/10**len(str(id_name)))
         option = expander.selectbox(
@@ -211,10 +201,15 @@ class ComunicationForAllUsersSt:
             options_for_product
         )
 
+        i_1 = int(hash(option)) % len(self.users_to_send)
+        i_2 = int(hash(option)) % len(self.users_to_send) + 1
+        i_3 = int(hash(option)) % len(self.users_to_send) + 2
+        samples_selected = [self.users_to_send[i_1], self.users_to_send[i_2], self.users_to_send[i_3]]
         options_people = expander.multiselect(
             'Para quem enviar (os clientes recomendados já estão pré-selecionados)',
-            self.users_to_send,
-            random.sample(self.users_to_send, 3))
+            self.users_to_send, samples_selected
+
+        )
 
         expander.checkbox("Enviar prospecto a todos em anexo")
         expander.checkbox("Enviar relatório a todos em anexo")
@@ -228,82 +223,13 @@ class ComunicationForAllUsersSt:
 
     def show(self):
         container = st.container()
-        container.subheader(f'Enviar informações para {self.user_name}')
+        container.subheader(f'Enviar informações para múltiplos clientes')
 
-        app_state = st.experimental_get_query_params()
-        app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
-        st.write(f"{app_state}")
         self.create_relatorios()
         self.create_modification()
         self.create_new_product()
 
 
-def create_for_user(user_name: Text):
-    import os
-    from src.api_communication import XpDataApi
-
-    client_id = os.environ.get('HACK_XP_CLIENT_ID')
-    client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
-    api = XpDataApi(client_id=client_id, client_secret=client_secret)
-    data = api.get_broker_products()
-
-    container = st.container()
-    container.subheader(f'Enviar informações para {user_name}')
-
-    app_state = st.experimental_get_query_params()
-    app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()}
-    st.write(f"{app_state}")
-
-    # Relatório
-    with container.container():
-        expander_1 = st.expander("Enviar relatórios da carteira")
-        text = CreateMessages().get_relatorio_carteira_message(user_name, "Dez-Nov", 50.1, 35.1, {"CIEL3": 10, "CASH3": -10, "PETR4": 54.3})
-        txt = expander_1.text_area('Mensagem:', text)
-        col1, col2, col3 = expander_1.columns(3)
-        col2.button('1- Enviar por e-mail', on_click=lambda: expander_1.success(f'Enviado para {user_name} por e-mail'))
-        col3.button('1- Enviar por whatsapp', on_click=lambda: expander_1.success(f'Enviado para {user_name} por whatsapp'))
-
-    # Recomendação de modificação no portfólio
-    with container.container():
-        expander_2 = st.expander("Enviar recomendação de modificação da carteira")
-        text = CreateMessages().get_modification_in_portfolio_message(user_name, data)
-        txt = expander_2.text_area('Mensagem:', text)
-        col1, col2, col3 = expander_2.columns(3)
-        col2.button('2- Enviar por e-mail', on_click=lambda: expander_2.success(f'Enviado para {user_name} por e-mail'))
-        col3.button('2- Enviar por whatsapp', on_click=lambda: expander_2.success(f'Enviado para {user_name} por whatsapp'))
-
-    # Recomendação de novo produto
-    with container.container():
-        expander_3 = st.expander("Enviar recomendação de novo produto")
-        product_options = []
-        for k, v in data.items():
-            if k != "name":
-                product_options.extend([x for x in v])
-        option = expander_3.selectbox(
-            f'Escolha um produto (os primeiros são os mais recomendados para o {user_name})',
-            sorted([x['identity'] for x in product_options])
-        )
-        text = CreateMessages().get_new_product_message(user_name, next((x for x in product_options if x['identity'] == option), {}))
-        txt = expander_3.text_area('Mensagem:', text)
-        col1, col2, col3 = expander_3.columns(3)
-        col2.button('3- Enviar por e-mail',
-                    on_click=lambda: expander_3.success(f'Enviado para {user_name} por e-mail'))
-        col3.button('3- Enviar por whatsapp',
-                    on_click=lambda: expander_3.success(f'Enviado para {user_name} por whatsapp'))
-
-
-"""if __name__ == '__main__':
-    import os
-    from src.api_communication import XpDataApi
-
-    client_id = os.environ.get('HACK_XP_CLIENT_ID')
-    client_secret = os.environ.get('HACK_XP_CLIENT_SECRET')
-    api = XpDataApi(client_id=client_id, client_secret=client_secret)
-
-    data = api.get_broker_products()
-
-    #text = CreateMessages().get_modification_in_portfolio_message("Zezinho", data)
-    #text = CreateMessages().get_relatorio_carteira_message("Zezinho", "Dez-Nov", 50.1, 35.1, {"CIEL3": 10, "CASH3": -10, "PETR4": 54.3})
-    text = CreateMessages().get_new_product_message("Zezinho", data["cdb"][0])
-    create_for_user()
-    print(text)"""
+@st.cache
+def get_users_name(api):
+    return [x["name"] for x in api.get_openbanking_users_data()]

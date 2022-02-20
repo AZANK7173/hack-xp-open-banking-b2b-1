@@ -1,5 +1,5 @@
-from api_communication import XpDataApi
-from user_report import Report
+from src.api_communication import XpDataApi
+from src.user_report import Report
 
 import pandas as pd
 import scipy.sparse as sparse
@@ -17,7 +17,7 @@ class InvestmentRecommender:
         if self.download_dataset: 
             self.dataset = self._get_all_users_data()
         else: 
-            self.dataset = pd.read_csv('data/dataset.csv', index_col = 1)
+            self.dataset = pd.read_csv('src/data/dataset.csv', index_col = 1)
 
         self.le_inv = LabelEncoder()
         self.dataset['investment_id'] = self.le_inv.fit_transform(self.dataset.investment_name).astype('int')
