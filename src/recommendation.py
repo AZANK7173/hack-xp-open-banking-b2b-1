@@ -12,11 +12,12 @@ class InvestmentRecommender:
 
         self.api = api
         self.column_names = ['identity','bankId','description','type','value','dueDate','profitability','risk','acquisitionDate','volumn','ticker','name']
-        
-        if download_datset: 
+        self.download_dataset = download_datset
+
+        if self.download_dataset: 
             self.dataset = self._get_all_users_data()
         else: 
-            self.dataset = pd.read_csv('data/dataset.csv')
+            self.dataset = pd.read_csv('data/dataset.csv', index_col = 1)
 
         self.le_inv = LabelEncoder()
         self.dataset['investment_id'] = self.le_inv.fit_transform(self.dataset.investment_name).astype('int')
@@ -38,13 +39,10 @@ class InvestmentRecommender:
         dataset_clients_investments = pd.DataFrame(columns=self.column_names)
         for client in client_names: 
             try:
-                client_report = Report(self.api, client_name=client)
+                client_report = Report(self.api, client_name=client, download_dataset=self.download_dataset)
                 dataset_clients_investments = dataset_clients_investments.append(client_report.inv_user_df, ignore_index=True)
             except:
                 pass
-        
-        dataset_clients_investments['investment_name'] = dataset_clients_investments.identity.apply(lambda x: '-'.join(x.split('-')[:3]))
-        dataset_clients_investments['inv_pct'] = dataset_clients_investments.groupby('client_name').total_value.apply(lambda x: 100 * x / float(x.sum())).astype('float')  
 
         return dataset_clients_investments
 
@@ -66,5 +64,6 @@ class InvestmentRecommender:
     def get_user_recommendations(self, client_id, n_similar = 10): 
         recommended = self.model.recommend(client_id, self.user_item_matrix[client_id], N = n_similar) 
         investments = self.le_inv.inverse_transform(recommended[0]) 
+        investments = [item for item in investments if item not in self.dataset.loc[self.dataset.client_id == client_id].investment_name.tolist()]
         return investments
 
