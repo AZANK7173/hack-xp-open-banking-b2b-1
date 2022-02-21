@@ -1,8 +1,6 @@
 # hackathon XP Open Finance B2B
 
-![logo_projeto](Logo_hack.jpg)
-
-<img src="Logo_hack.jpg" alt="logo_projeto" width="200"/>
+<img src="Logo_hack.jpg" alt="logo_projeto" width="400"/>
 
 ## Repositório Grupo 11 - XP Insights
 
