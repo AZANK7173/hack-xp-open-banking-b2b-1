@@ -2,6 +2,8 @@
 
 ![logo_projeto](Logo_hack.jpg)
 
+<img src="Logo_hack.jpg" alt="logo_projeto" width="200"/>
+
 ## Repositório Grupo 11 - XP Insights
 
 Este repositório compreende os códigos desenvolvidos pelo Grupo 11 durante o período de 18/02/2022 à 20/02/2022. Os arquivos criam a aplicação do XP Insights, plataforma pensada pela equipe com o objetivo de auxiliar assessores XP e autônomos no relacionamento com seus clientes. 
