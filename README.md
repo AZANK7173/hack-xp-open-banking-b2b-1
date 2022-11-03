@@ -29,3 +29,5 @@ Arquivo ```streamlit/secrets.toml```
 HACK_XP_CLIENT_ID = "CHAVE_CLIENT_ID"
 HACK_XP_CLIENT_SECRET = "CHAVE_CLIENT_SECRET"
 ```
+
+O vídeo de apresentação do projeto pode ser visto aqui: [https://www.youtube.com/watch?v=mbe97Mp11bI](https://www.youtube.com/watch?v=mbe97Mp11bI)
